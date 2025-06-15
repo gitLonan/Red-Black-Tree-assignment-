@@ -53,6 +53,8 @@ def property_update(property_id):
     if not property:
         return "Property not found", 404
     data = request.get_json()
+    if data is None:
+        return "Error, wrong data type, should be JSON", 400
     
     column_names = [column.key for column in sa.inspect(Building).mapper.column_attrs]
 
