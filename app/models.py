@@ -1,9 +1,9 @@
 from app import db
-from typing import Optional
+
 import sqlalchemy as sa     
 import sqlalchemy.orm as so 
 
-from datetime import datetime, timezone
+
 
 
 class Building(db.Model):
@@ -29,7 +29,24 @@ class Building(db.Model):
     estate_type_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("estate_type.id"))
     offer_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("offer.id"))
     city_part_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("city_part.id"))
-    
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "square_footage": self.square_footage,
+            "construction_year": self.construction_year,
+            "land_area": self.land_area,
+            "registration": self.registration,
+            "rooms": self.rooms,
+            "bathrooms": self.bathrooms,
+            "parking": self.parking,
+            "price": self.price,
+
+            #Foreign keys
+            "estate_type_id": self.estate_type_id,
+            "offer_id": self.offer_id,
+            "city_part_id": self.city_part_id,
+        }
 
 class BuildingAmenity(db.Model):
     __tablename__ = "building_amenity"
@@ -41,6 +58,12 @@ class BuildingAmenity(db.Model):
     building_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("building.id"), nullable=False, primary_key=True)
     amenity_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("amenity.id"), nullable=False, primary_key=True)
 
+    def to_dict(self):
+        return {
+            "building_id": self.building_id,
+            "amenity_id": self.amenity_id,
+        }
+
 class Amenity(db.Model):
     __tablename__ = "amenity"
 
@@ -49,6 +72,11 @@ class Amenity(db.Model):
     #relationship
     building_amenity: so.WriteOnlyMapped[list["BuildingAmenity"]] = so.relationship(back_populates="amenity")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
 
 
 class BuildingFloor(db.Model):
@@ -61,6 +89,12 @@ class BuildingFloor(db.Model):
     #FOREIGN KEYS
     building_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("building.id"), nullable=False, primary_key=True)
 
+    def to_dict(self):
+        return {
+            "floor_level": self.floor_level,
+            "floor_total": self.floor_total,
+            "building_id": self.building_id,
+        }
 
 
 class BuildingHeating(db.Model):
@@ -73,6 +107,12 @@ class BuildingHeating(db.Model):
     heating_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("heating.id"), nullable=False, primary_key=True)
     building_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("building.id"), nullable=False, primary_key=True)
 
+    def to_dict(self):
+        return {
+            "heating_id": self.heating_id,
+            "building_id": self.building_id,
+        }
+
 class Heating(db.Model):
     __tablename__ = "heating"
 
@@ -81,6 +121,11 @@ class Heating(db.Model):
     #relationship
     building_heating: so.WriteOnlyMapped[list["BuildingHeating"]] = so.relationship(back_populates="heating")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
 
 
 class City(db.Model):
@@ -93,6 +138,13 @@ class City(db.Model):
     state: so.Mapped["State"] = so.relationship(back_populates="city")
     #FOREIGN KEYS
     state_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("state.id"))
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "state_id": self.state_id,
+        }
     
 class CityPart(db.Model):
     __tablename__ = "city_part"
@@ -105,6 +157,14 @@ class CityPart(db.Model):
     #FOREIGN KEY
     city_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("city.id"))
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "city_id": self.city_id,
+        }
+
+
 class State(db.Model):
     __tablename__ = "state"
 
@@ -113,6 +173,11 @@ class State(db.Model):
     #relationship
     city: so.WriteOnlyMapped[list["City"]] = so.relationship(back_populates="state")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
 
 
 class EstateType(db.Model):
@@ -123,13 +188,22 @@ class EstateType(db.Model):
     #relationship
     building: so.WriteOnlyMapped[list["Building"]] = so.relationship(back_populates="estate_type")
 
-
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
 
 class Offer(db.Model):
     __tablename__ = "offer"
-
 
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
      #relationship
     building: so.WriteOnlyMapped[list["Building"]] = so.relationship(back_populates="offer")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
