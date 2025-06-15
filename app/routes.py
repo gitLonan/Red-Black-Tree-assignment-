@@ -44,3 +44,25 @@ def property_search():
 
     results = query.all()
     return [b.to_dict() for b in results], 200
+
+
+
+@app.route('/property/<property_id>', methods=["PUT"])
+def property_update(property_id):
+    property = db.session.scalar(sa.select(Building).where(Building.id == property_id))
+    if not property:
+        return "Property not found", 404
+    data = request.get_json()
+    
+    column_names = [column.key for column in sa.inspect(Building).mapper.column_attrs]
+
+    old_data = {f"{attr}": getattr(property, attr) for attr in data if attr in column_names}
+    print(f"Data before updating: {old_data}")
+
+    for key in data:
+        if key in column_names:
+            setattr(property, key, data[key])
+
+    db.session.commit()
+    print(f"Data after updating: {data}")
+    return property.to_dict(), 200
