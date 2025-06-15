@@ -92,6 +92,7 @@ class City(db.Model):
     city_parts: so.WriteOnlyMapped[list["CityPart"]] = so.relationship(back_populates="city")
     state: so.Mapped["State"] = so.relationship(back_populates="city")
     #FOREIGN KEYS
+    state_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("state.id"))
     
 class CityPart(db.Model):
     __tablename__ = "city_part"
