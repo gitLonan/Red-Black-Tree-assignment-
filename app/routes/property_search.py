@@ -3,7 +3,7 @@ from app import app, db
 import sqlalchemy as sa
 from app.models import Building, EstateType, CityPart, City
 
-def init_routes(bp_property_search):
+def init_property_search(bp_property_search):
 
     @bp_property_search.route('/property/search', methods=["GET"])
     def property_search():
@@ -38,4 +38,4 @@ def init_routes(bp_property_search):
             query = query.filter(Building.estate_type.has(EstateType.name.ilike(estate_type)))
 
         results = query.all()
-        return [b.to_dict() for b in results], 200
+        return jsonify([b.to_dict() for b in results]), 200

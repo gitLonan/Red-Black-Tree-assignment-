@@ -5,7 +5,7 @@ from flask import request, jsonify
 
 
 
-def init_routes(bp_jwt_auth):
+def init_JWT_auth(bp_jwt_auth):
 
     @bp_jwt_auth.route("/login", methods=["POST"])
     def login():

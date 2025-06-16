@@ -5,7 +5,7 @@ from app.models import Building, EstateType, CityPart, City
 from flask_jwt_extended import jwt_required
 
 
-def init_routes(bp_property_management):
+def init_property_management(bp_property_management):
 
 
     @bp_property_management.route('/property/management', methods=["POST", "GET"])
@@ -18,29 +18,27 @@ def init_routes(bp_property_management):
 
         data = request.get_json()
         if data is None:
-            return "Error, missing data", 400
+            return jsonify({"Error": "missing data"}), 400
         
         print(f"This is len of data, {len(data)}")
-        
         
         if len(data) < len(column_names):
             print("Some fields need input", 400)
         
         invalid_fields = [field for field in data if field not in column_names]
         print("THESE ARE ERRORS", invalid_fields)
-
         if len(invalid_fields) > 0:
-            return f"Fields that dont match with the database: {invalid_fields}"
-        
+            return jsonify({"Error": "Fields that dont match with the database: ",
+                           "fileds": {invalid_fields}})
         
         try:
             building = Building(**data)
             db.session.add(building)
             db.session.commit()
-            return building.to_dict(), 201
+            return jsonify(building.to_dict()), 201
         except Exception as e:
             db.session.rollback()
-            return f"Error: {str(e)}", 500
+            return jsonify({"Error": str(e)}), 500
         
 
     @bp_property_management.route('/property/<property_id>', methods=["PUT"])
@@ -48,10 +46,10 @@ def init_routes(bp_property_management):
     def property_update(property_id):
         property = db.session.scalar(sa.select(Building).where(Building.id == property_id))
         if not property:
-            return "Property not found", 404
+            return jsonify({"Error": "Property not found"}), 404
         data = request.get_json()
         if data is None:
-            return "Error, wrong data type, should be JSON", 400
+            return jsonify({"Error": "wrong data type, should be JSON"}), 400
         
         column_names = [column.key for column in sa.inspect(Building).mapper.column_attrs]
         print(len(column_names))
@@ -64,4 +62,4 @@ def init_routes(bp_property_management):
 
         db.session.commit()
         print(f"Data after updating: {data}")
-        return property.to_dict(), 200
+        return jsonify(property.to_dict()), 200
