@@ -18,3 +18,9 @@ def property_management_bp() -> Blueprint:
     from .property_management import init_routes
     init_routes(bp_property_management)
     return bp_property_management
+
+def JWT_auth_bp() -> Blueprint:
+    bp_jwt_auth = Blueprint("jwt_auth", __name__)
+    from .JWT_auth import init_routes
+    init_routes(bp_jwt_auth)
+    return bp_jwt_auth

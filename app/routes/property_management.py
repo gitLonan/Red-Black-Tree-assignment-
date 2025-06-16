@@ -2,13 +2,14 @@ from flask import jsonify, request, flash
 from app import app, db
 import sqlalchemy as sa
 from app.models import Building, EstateType, CityPart, City
-
+from flask_jwt_extended import jwt_required
 
 
 def init_routes(bp_property_management):
 
 
     @bp_property_management.route('/property/management', methods=["POST", "GET"])
+    @jwt_required()
     def property_management():
         column_names = [column.key for column in sa.inspect(Building).mapper.column_attrs if column.key != 'id']
         print(column_names)
@@ -43,6 +44,7 @@ def init_routes(bp_property_management):
         
 
     @bp_property_management.route('/property/<property_id>', methods=["PUT"])
+    @jwt_required()
     def property_update(property_id):
         property = db.session.scalar(sa.select(Building).where(Building.id == property_id))
         if not property:
