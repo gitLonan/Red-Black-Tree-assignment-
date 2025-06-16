@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required
 def init_property_management(bp_property_management):
 
 
-    @bp_property_management.route('/property/management', methods=["POST", "GET"])
+    @bp_property_management.route('/property/management', methods=["POST"])
     @jwt_required()
     def property_management():
         column_names = [column.key for column in sa.inspect(Building).mapper.column_attrs if column.key != 'id']
@@ -18,12 +18,12 @@ def init_property_management(bp_property_management):
 
         data = request.get_json()
         if data is None:
-            return jsonify({"Error": "missing data"}), 400
+            return jsonify({"Error": "missing data"}), 404
         
         print(f"This is len of data, {len(data)}")
         
         if len(data) < len(column_names):
-            print("Some fields need input", 400)
+            print("Some fields need input", 404)
         
         invalid_fields = [field for field in data if field not in column_names]
         print("THESE ARE ERRORS", invalid_fields)
@@ -44,21 +44,33 @@ def init_property_management(bp_property_management):
     @bp_property_management.route('/property/<property_id>', methods=["PUT"])
     @jwt_required()
     def property_update(property_id):
+        try:
+            property_id = int(property_id)
+        except ValueError:
+            return jsonify({"error": "Building ID must be an integer"}), 400
+        
         property = db.session.scalar(sa.select(Building).where(Building.id == property_id))
         if not property:
             return jsonify({"Error": "Property not found"}), 404
         data = request.get_json()
         if data is None:
-            return jsonify({"Error": "wrong data type, should be JSON"}), 400
+            return jsonify({"Error": "wrong data type, should be JSON"}), 415
         
         column_names = [column.key for column in sa.inspect(Building).mapper.column_attrs]
         print(len(column_names))
         old_data = {f"{attr}": getattr(property, attr) for attr in data if attr in column_names}
         print(f"Data before updating: {old_data}")
 
+        missing_prop = []
         for key in data:
             if key in column_names:
                 setattr(property, key, data[key])
+            else:
+                missing_prop.append(key)
+        
+        if len(missing_prop) > 0:
+            return jsonify({"Error": "property doesnt exist",
+                            "Wrong properties": missing_prop}), 400
 
         db.session.commit()
         print(f"Data after updating: {data}")
