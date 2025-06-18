@@ -59,7 +59,7 @@ class DataProcessing:
     def set_dic_columns(row) -> dict:
         """
         Setting the corect column names and converting their value to the correct one
-        
+
         Args:
             row  (dict) - row of data from the file that we want to process
         Return:
@@ -179,10 +179,10 @@ class DataProcessing:
 
 
     @staticmethod
-    def data_proccesing(db, models, app):
+    def data_processing(db, models, app):
             """
             Checks in the root directory if there are files for the processing, if there are moves them to staging area, after that it checks if
-            the file was already proccesed, if it didnt, it proceeds
+            the file was already processed, if it didnt, it proceeds
 
             Args:
                 db (:obj:) - database instace 
